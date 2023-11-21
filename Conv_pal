@@ -12,7 +12,7 @@ main:
 addi $sp, $zero, 0x7fffeffc
 la $s1, risultati
 la $s0, numeri
-li $s3, 0x10010040
+li $s3, 0x10010040 #indirizzo di fine area di memoria dei numeri
 lw $s0, ($s0)  #s0 = numero
 loop_numeri:
 addi $a0,$zero, 2 #base

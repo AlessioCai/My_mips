@@ -12,6 +12,7 @@ main:
 addi $sp, $zero, 0x7fffeffc
 la $s1, risultati
 la $s0, numeri
+li $s3, 0x10010040
 lw $s0, ($s0)  #s0 = numero
 loop_numeri:
 addi $a0,$zero, 2 #base
@@ -27,6 +28,8 @@ pal:
 non_pal:
 	addi $a0, $a0, 1
 	bne $a0, 10, Loop_basi
+addiu $s0, $s0, 4
+bne $s0, $s3, loop_numeri
 j fine_programma
 
 

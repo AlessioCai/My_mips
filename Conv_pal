@@ -1,0 +1,88 @@
+#converte numeri forniti da base 10 a ogni base compresa tra 2 e 9 e controlla se siano palindromi o meno. Salva i numeri che sono palindromi in almeno una base come risultati
+
+.data 0x10010000
+numeri: .word 10 #Numeri
+
+.data 0x10010128
+risultati: .space 128 #risultati, numeri palindromi in almeno una base
+
+.text
+main:
+#imposto lo stack pointer all'inizio dello stack
+addi $sp, $zero, 0x7fffeffc
+la $s1, risultati
+la $s0, numeri
+lw $s0, ($s0)  #s0 = numero
+loop_numeri:
+addi $a0,$zero, 2 #base
+Loop_basi:
+	add $a1,$zero,$s0 # numero in a1 per essere passato ai sottoprogrammi
+	jal converti
+	move $a1, $v0
+	jal Palindromo
+	beq $v0, $zero, non_pal
+pal:		
+	sw $s0, ($s1)
+	addiu $s1, $s1, 4
+non_pal:
+	addi $a0, $a0, 1
+	bne $a0, 10, Loop_basi
+j fine_programma
+
+
+
+
+converti: #da base 10 a b. in input a0 la base, a1 il numero in base 10. Dividi il numero per la base, salvando il resto. il numero finale sarà la sequenza di resti sommati, presi al contrario
+	li $t1, 10 
+	addi $t3, $zero, 1 #aggiungo 1 per non perdere gli 0 che precedono il primo 1. Lo sottraggo dopo aver invertito il numero
+loop_converti:
+	div $a1, $a0
+	mflo $a1	   
+	mfhi $t2           # $t2 = resto
+	mul $t3, $t3, $t1  
+	addu $t3, $t3, $t2 
+	bgt $a1, $zero, loop_converti
+ 	add $a1, $t3, $zero
+ 	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	jal Num_contrario
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
+	subi $v0, $v0, 1
+	div $v0, $t1
+	mfhi $v0
+	jr $ra 
+
+
+Palindromo:
+	   # $a1 contiene numero da controllare
+	# salva ra e a1 da un'altra parte
+  	jal Num_contrario 
+ 	#rimetti ra e a1 al loro posto
+  	bne $a1, $v0, no
+si: #numero palindromo
+ 	addi $v0, $zero, 1
+  	jr $ra
+no: #numero non palindromo
+  	add $v0, $zero, $zero
+ 	jr $ra
+  
+  
+Num_contrario:
+      # $a1 contiene numero da invertire 
+     add $t2, $zero, $zero  # $t2 conterrà il numero invertito
+     li $t1, 10
+     move $t3, $a1
+     beq $a1, $zero, fine_contr
+loop_contrario:
+     divu $a1, $t1      # Divid il numero di 10
+     mflo $a1           # $a1 = quoziente
+     mfhi $t3          # $t2 = resto
+     mul $t2, $t2, $t1  # contrario=contrario*10
+     addu $t2, $t2, $t3 #         + resto    
+     bgt $a1, $zero, loop_contrario
+fine_contr: 
+ 	move $v0, $t2  
+	jr $ra              
+
+ fine_programma:

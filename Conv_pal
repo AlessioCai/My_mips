@@ -14,6 +14,7 @@ la $s1, risultati
 la $s0, numeri
 li $s3, 0x10010040 #indirizzo di fine area di memoria dei numeri
 lw $s0, ($s0)  #s0 = numero
+li $s4, 0
 loop_numeri:
 addi $a0,$zero, 2 #base
 Loop_basi:
@@ -22,7 +23,9 @@ Loop_basi:
 	move $a1, $v0
 	jal Palindromo
 	beq $v0, $zero, non_pal
-pal:		
+pal:	
+	beq $s4, $s0, non_pal #se abbiamo gi‡ trovato che questo numero Ë palindromo in un'altra base, non lo salviamo di nuovo	
+	move $s4, $s0
 	sw $s0, ($s1)
 	addiu $s1, $s1, 4
 non_pal:
@@ -35,7 +38,7 @@ j fine_programma
 
 
 
-converti: #da base 10 a b. in input a0 la base, a1 il numero in base 10. Dividi il numero per la base, salvando il resto. il numero finale sar√† la sequenza di resti sommati, presi al contrario
+converti: #da base 10 a b. in input a0 la base, a1 il numero in base 10. Dividi il numero per la base, salvando il resto. il numero finale sar‡ la sequenza di resti sommati, presi al contrario
 	li $t1, 10 
 	addi $t3, $zero, 1 #aggiungo 1 per non perdere gli 0 che precedono il primo 1. Lo sottraggo dopo aver invertito il numero
 loop_converti:
@@ -73,7 +76,7 @@ no: #numero non palindromo
   
 Num_contrario:
       # $a1 contiene numero da invertire 
-     add $t2, $zero, $zero  # $t2 conterr√† il numero invertito
+     add $t2, $zero, $zero  # $t2 conterr‡ il numero invertito
      li $t1, 10
      move $t3, $a1
      beq $a1, $zero, fine_contr

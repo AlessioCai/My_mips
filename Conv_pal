@@ -1,23 +1,24 @@
 #converte numeri forniti da base 10 a ogni base compresa tra 2 e 9 e controlla se siano palindromi o meno. Salva i numeri che sono palindromi in almeno una base come risultati
 
 .data 0x10010000
-numeri: .word 5, 10, 157, 39, 1032 #Numeri
+numeri: .word 5, 10, 83, 39, 1032 #Numeri
 
 .data 0x10010120
-risultati: .space 44 #risultati, numeri palindromi in almeno una base
+risultati: .space 40 #risultati, numeri palindromi in almeno una base
 
 .text
 main:
 #imposto lo stack pointer all'inizio dello stack
-addi $sp, $zero, 0x7fffeffc
+addiu $sp, $zero, 0x7fffeffc
 la $s1, risultati
 la $s2, numeri
 li $s3, 0x10010020 #indirizzo di fine area di memoria dei numeri
 lw $s0, ($s2)  #s0 = numero
 loop_numeri:
-addi $a0,$zero, 2 #base
+addi $s4,$zero, 2 #base
 Loop_basi:
 	add $a1,$zero,$s0 # numero in a1 per essere passato ai sottoprogrammi
+	add $a0,$zero,$s4  # base in a0 per essere passato ai sottoprogrammi
 	jal converti
 	move $a1, $v0
 	jal Palindromo
@@ -27,8 +28,8 @@ pal:
 	addiu $s1, $s1, 4
 	j Nuovo_numero
 non_pal:
-	addi $a0, $a0, 1
-	bne $a0, 10, Loop_basi
+	addi $s4, $s4, 1
+	bne $s4, 10, Loop_basi
 Nuovo_numero:
 	addiu $s2, $s2, 4
 	lw $s0, ($s2)  #s0 = prossimo numero
@@ -36,21 +37,21 @@ Nuovo_numero:
 	j fine_programma
 
 
-converti: #da base 10 a b. in input a0 la base, a1 il numero in base 10. Dividi il numero per la base, salvando il resto. il numero finale sar‡ la sequenza di resti sommati, presi al contrario
+converti: #da base 10 a b. in input a0 la base, a1 il numero in base 10. Dividi il numero per la base, salvando il resto. il numero finale sar√† la sequenza di resti sommati, presi al contrario
 	li $t1, 10 
 	addi $t3, $zero, 1 #aggiungo 1 per non perdere gli 0 che precedono il primo 1. Lo sottraggo e divido per 10 dopo aver invertito il numero *
 loop_converti:
 	div $a1, $a0
-	mflo $a1	   
-	mfhi $t2           # $t2 = resto
+	mflo $a1	   # quoziente
+	mfhi $t2           # $t2 = resto 
 	mul $t3, $t3, $t1  
-	addu $t3, $t3, $t2 
+	addu $t3, $t3, $t2 # t3 contiene il numero da invertire
 	bgt $a1, $zero, loop_converti
  	add $a1, $t3, $zero
  	addi $sp, $sp, -4
 	sw $ra, ($sp)
 	jal Num_contrario
-	lw $ra, ($sp) #RIPRENDO IL RETURN ADDRESS DALLO STACK
+	lw $ra, ($sp) #riprendo il return address dallo stack
 	addi $sp, $sp, 4 #incremento lo stack
 	subi $v0, $v0, 1    # *
 	div $v0, $t1
@@ -80,7 +81,7 @@ no: #numero non palindromo
   
 Num_contrario:
       # $a1 contiene numero da invertire 
-     add $t2, $zero, $zero  # $t2 conterr‡ il numero invertito
+     add $t2, $zero, $zero  # $t2 conterr√† il numero invertito
      li $t1, 10
      beq $a1, $zero, fine_contr
 loop_contrario:

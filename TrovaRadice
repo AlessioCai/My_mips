@@ -1,0 +1,92 @@
+
+.data 0x10010000
+numeri: .word 101, 83, 48, 1087, 101 #Numeri
+
+.data 0x10010120
+risultati: .space 84 #risultati
+
+.text
+main:
+#imposto lo stack pointer all'inizio dello stack
+addiu $sp, $zero, 0x7fffeffc
+la $s1, risultati
+la $s2, numeri
+li $s3, 0x10010014 #indirizzo di fine area di memoria dei numeri
+Main_loop:
+lw $s0, ($s2)  #s0 = numero
+ move $a0, $s0
+
+#In calling function:
+ #   Load the number to be squared into $a0
+    jal Radice
+sw $v0, ($s1)
+ addiu $s1, $s1, 4
+ addiu $s2, $s2, 4
+ bne $s2, $s3, Main_loop   
+j end
+
+
+
+
+
+
+
+Radice:
+   # Inizializzo $t0 = n, $t1 = i = 0, $t2 = x = n = $a0, $t3 = n/2
+add $t0, $zero, $a0
+add $t1, $zero, $zero
+add $t2, $zero, $a0
+srl $t3, $t2, 1
+Loop_Radice:
+    div $t4, $t0, $t2 
+    add $t4, $t4, $t2
+    srl $t2, $t4, 1
+    addi $t1, $t1, 1
+    blt  $t1, $t3, Loop_Radice
+    move $v0, $t2
+    jr $ra
+    
+    
+    
+    
+    end:j end
+  
+    
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+End: j End

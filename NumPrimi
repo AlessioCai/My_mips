@@ -1,16 +1,14 @@
-
+#Controlla se i numeri forniti sono primi o meno, salva tra i risultati solo i numeri primi
 .data 0x10010000
-numeri: .word 97, 85, 48, 1087, 101 #Numeri
+Numeri: .word 2038074503, 3, 42, 1087, 85 #Numeri
 
 .data 0x10010120
-risultati: .space 84 #risultati
+Risultati: .space 20 #risultati
 
 .text
-main:
-	#imposto lo stack pointer all'inizio dello stack
-	addiu $sp, $zero, 0x7fffeffc
-	la $s1, risultati
-	la $s2, numeri
+Main:
+	la $s1, Risultati
+	la $s2, Numeri
 	li $s3, 0x10010014 #indirizzo di fine area di memoria dei numeri
 Main_loop:
 	lw $s0, ($s2)  #s0 = numero
@@ -25,26 +23,25 @@ Nuovo_Numero:
  	bne $s2, $s3, Main_loop   
 	j End
 
-
-
 Check_Primo: 
 #dividi per due, trovi radice, loop da 3 a radice con incrementi di 2
 	li $t0, 2
 	div $a0, $t0
 	mfhi $t0
-	beq $t0, $zero, Non_Primo #se divisibile per due, non Ë primo
-	addi $sp, $sp, -4
-	sw $ra, ($sp) #salvo in memoria il ra prima di chiamare il secondo sottoprogramma
-   	jal Radice
-	lw $ra, ($sp) #riprendo il return address dallo stack
-	addi $sp, $sp, 4 
+	beq $t0, $zero, Non_Primo #se divisibile per due, non √® primo
+	mtc1 $a0, $f0
+	cvt.s.w $f0, $f0
+	sqrt.s $f0, $f0
+	cvt.w.s $f0, $f0
+	mfc1 $t2, $f0 # in t2 ho la radice di n intera
 	li $t1, 3
+	blt $t2, $t1, Primo #il loop funziona per tutto tranne 3, lo includo cos√¨. Tutti i numeri dispari con radice minore di 3 sono primi
 Loop_Primi:
 	div $a0, $t1
 	mfhi $t0
-	beq $t0, $zero, Non_Primo #se N divisibile, non Ë primo
+	beq $t0, $zero, Non_Primo #se N divisibile, non √® primo
 	addi $t1, $t1, 2
-	ble $t1, $v0, Loop_Primi #controllo tutti i numeri dispari <= della radice di N
+	ble $t1, $t2, Loop_Primi #controllo tutti i numeri dispari <= della radice di N
 	Primo: 
 	add $v0, $zero, $zero
 	jr $ra
@@ -52,20 +49,6 @@ Loop_Primi:
 	addi $v0, $zero, 1
 	jr $ra
 
-Radice:
-   # Inizializzo $t0 = n, $t1 = i = 0, $t2 = x = n = $a0, $t3 = n/2
-add $t0, $zero, $a0
-add $t1, $zero, $zero
-add $t2, $zero, $a0
-srl $t3, $t2, 1
-Loop_Radice:
-    div $t4, $t0, $t2 
-    add $t4, $t4, $t2
-    srl $t2, $t4, 1
-    addi $t1, $t1, 1
-    blt  $t1, $t3, Loop_Radice
-    move $v0, $t2
-    jr $ra
-    
     
 End: j End
+
